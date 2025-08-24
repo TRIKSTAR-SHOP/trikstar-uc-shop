@@ -1,1 +1,1 @@
-# trikstar-uc-shop
+# trikstar-uc-shop.github.io
