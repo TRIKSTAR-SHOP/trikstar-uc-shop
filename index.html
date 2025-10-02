@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>TRIKSTAR TopUp UC PUBG</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#FFD700; --red:#8B0000; --black:#000; --glass:rgba(255,255,255,.1); }
+  *{ box-sizing:border-box }
+  body{ margin:0; font-family:Poppins,sans-serif; background:linear-gradient(135deg,var(--black),var(--red),var(--gold)); color:#fff; }
+  header{text-align:center;padding:32px 16px}
+  h1,h2{color:var(--gold)}
+  nav{display:flex;justify-content:center;gap:24px;margin-top:12px}
+  nav a{color:var(--gold);font-weight:600;text-decoration:none;cursor:pointer}
+  nav a:hover{color:#fff}
+  .page{display:none;padding:32px 16px;text-align:center;animation:fade .3s ease}
+  .active{display:block}
+  .hero-img{width:140px;margin-top:16px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .subnav{display:flex;justify-content:center;gap:10px;margin:16px 0}
+  .subnav button{border:1px solid var(--gold);background:rgba(255,255,255,.08);color:var(--gold);padding:10px 14px;border-radius:8px;cursor:pointer;transition:.2s}
+  .subnav button.active,.subnav button:hover{background:var(--gold);color:#000}
+  .table-wrap{width:92%;max-width:760px;margin:12px auto;border-radius:10px;overflow:hidden;background:var(--glass)}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.2);text-align:left}
+  th{background:rgba(0,0,0,.5);color:var(--gold)}
+  tr:hover{background:rgba(255,215,0,.12);cursor:pointer}
+  .note{opacity:.85;font-size:.9em;margin-top:8px}
+  form{max-width:760px;margin:20px auto;background:var(--glass);padding:22px;border-radius:12px;text-align:left;backdrop-filter:blur(6px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  label{font-weight:600;margin:8px 0 6px;display:block}
+  input,select{width:100%;padding:10px;border:none;border-radius:8px;margin-bottom:14px;background:rgba(0,0,0,.35);color:#fff}
+  input::placeholder{color:#ccc}
+  .inline{display:flex;gap:12px}
+  .inline > div{flex:1}
+  .summary{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.35);padding:12px;border-radius:10px;margin:10px 0 16px}
+  .summary .total{font-weight:700;color:var(--gold)}
+  button[type=submit]{background:var(--gold);color:#000;font-weight:700;padding:12px 16px;border:none;border-radius:8px;cursor:pointer;box-shadow:0 0 16px rgba(255,215,0,.35);transition:.2s}
+  button[type=submit]:hover{background:#fff;box-shadow:0 0 22px rgba(255,255,255,.35)}
+  footer{text-align:center;padding:18px;color:#ccc;background:rgba(0,0,0,.6);margin-top:32px;font-size:.9em}
+
+  /* Modal konfirmasi */
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
+  .modal{width:92%;max-width:560px;background:#0d0d0d;border:1px solid rgba(255,215,0,.35);border-radius:12px;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  .modal h3{margin:8px 0 12px;color:var(--gold)}
+  .modal .row{display:flex;justify-content:space-between;margin:6px 0}
+  .modal .row .label{opacity:.8}
+  .modal .pay-box{background:rgba(255,215,0,.08);border:1px dashed var(--gold);padding:12px;border-radius:10px;margin-top:10px}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+  .btn{padding:10px 14px;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer}
+  .btn.primary{background:var(--gold);color:#000;border:none;font-weight:700}
+
+  /* Loading overlay */
+  .loading{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:60}
+  .spinner{width:56px;height:56px;border:5px solid rgba(255,215,0,.25);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite}
+
+  /* Admin */
+  #admin .wrap{max-width:960px;margin:0 auto;text-align:left}
+  #admin table{width:100%;margin-top:12px}
+  #admin .filter{display:flex;gap:12px;margin-bottom:12px}
+  #admin .filter select, #admin .filter input{background:rgba(0,0,0,.35);color:#fff;border:none;border-radius:8px;padding:8px}
+
+  /* Responsiveness */
+  @media (max-width:760px){.inline{flex-direction:column}.table-wrap{overflow-x:auto}th,td{padding:10px}form{padding:18px}}
+
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+   <img src="logo-trikstar.png" alt="Logo TRIKSTAR" style="width:200px;height:200px;display:block;margin:0 auto 20px auto;border-radius:16px;box-shadow:0 10px 30px #0007">
+  <h1>TRIKSTAR Top-Up UC PUBG</h1>
+  <p>Cepat • Aman • Terpercaya</p>
+  <nav>
+    <a onclick="showPage('hero')">Beranda</a>
+    <a onclick="showPage('profil')">Profil</a>
+    <a onclick="showPage('uc')">Pilihan UC</a>
+    <a onclick="showPage('admin')">Cek Status User</a>
+  </nav>
+</header>
+
+<section id="hero" class="page active">
+  <h2>Selamat Datang di TRIKSTAR</h2>
+  <p>SERTIFIKAT EKSKLUSIF ATAS KEBERHASILAN TRIKSTAR TEAM.</p>
+  <img src="CERTIFICATE BY NUHA EVENT.jpg" alt="Logo TRIKSTAR" style="width:200px;height:200px;display:block;margin:0 auto 20px auto;border-radius:16px;box-shadow:0 10px 30px #0007">
+  <img src="CERTIFICATE BY TULIP EVENT.jpg" alt="Logo TRIKSTAR" style="width:200px;height:200px;display:block;margin:0 auto 10px auto;border-radius:16px;box-shadow:0 10px 10px #0007">
+</section>
+
+<section id="profil" class="page">
+  <h2>Profil Kami</h2>
+  <p>Platform top-up Game PUBG Cepat, Aman, Terpercaya. Dengan Harga yang sangat Kompetitif.</p>
+  <p class="note">Proses Transaksi hanya atas nama Muhammad Aditiya Purnama Gozali.</p>
+</section>
+
+<section id="uc" class="page">
+  <h2>Pilihan Paket UC</h2>
+
+  <div class="subnav">
+    <button class="active" onclick="showUC('fast')">UC FAST</button>
+    <button onclick="showUC('slow')">UC SLOW</button>
+    <button onclick="showUC('sultan')">UC PAKET SULTAN SLOW</button>
+  </div>
+
+  <div id="list-fast" class="table-wrap">
+    <table>
+      <tr><th>Paket</th><th>Jumlah UC</th><th>Harga</th></tr>
+      <tr><td>UC Fast</td><td>60 UC</td><td>Rp 13.000</td></tr>
+      <tr><td>UC Fast</td><td>120 UC</td><td>Rp 25.000</td></tr>
+      <tr><td>UC Fast</td><td>180 UC</td><td>Rp 37.000</td></tr>
+      <tr><td>UC Fast</td><td>240 UC</td><td>Rp 49.000</td></tr>
+      <tr><td>UC Fast</td><td>300 UC</td><td>Rp 61.000</td></tr>
+      <tr><td>UC Fast</td><td>420 UC</td><td>Rp 85.000</td></tr>
+      <tr><td>UC Fast</td><td>540 UC</td><td>Rp 109.000</td></tr>
+      <tr><td>UC Fast</td><td>660 UC</td><td>Rp 133.000</td></tr>
+      <tr><td>UC Fast</td><td>780 UC</td><td>Rp 157.000</td></tr>
+      <tr><td>UC Fast</td><td>900 UC</td><td>Rp 181.000</td></tr>
+      <tr><td>UC Fast</td><td>1080 UC</td><td>Rp 217.000</td></tr>
+      <tr><td>UC Fast</td><td>1200 UC</td><td>Rp 241.000</td></tr>
+      <tr><td>UC Fast</td><td>1500 UC</td><td>Rp 301.000</td></tr>
+      <tr><td>UC Fast</td><td>1800 UC</td><td>Rp 331.000</td></tr>
+      <tr><td>UC Fast</td><td>2400 UC</td><td>Rp 441.000</td></tr>
+      <tr><td>UC Fast</td><td>3000 UC</td><td>Rp 551.000</td></tr>
+      <tr><td>UC Fast</td><td>3600 UC</td><td>Rp 661.000</td></tr>
+      <tr><td>UC Fast</td><td>4200 UC</td><td>Rp 771.000</td></tr>
+      <tr><td>UC Fast</td><td>4800 UC</td><td>Rp 881.000</td></tr>
+      <tr><td>UC Fast</td><td>5400 UC</td><td>Rp 991.000</td></tr>
+      <tr><td>UC Fast</td><td>6000 UC</td><td>Rp 1.101.000</td></tr>
+      <tr><td>UC Fast</td><td>6600 UC</td><td>Rp 1.211.000</td></tr>
+      <tr><td>UC Fast</td><td>7200 UC</td><td>Rp 1.321.000</td></tr>
+   </table>
+  </div>
+
+  <div id="list-slow" class="table-wrap" style="display:none">
+    <table>
+      <tr><th>Paket</th><th>Jumlah UC</th><th>Harga</th></tr>
+      <tr><td>UC Slow</td><td>660 UC</td><td>Rp 100.000</td></tr>
+      <tr><td>UC Slow</td><td>1320 UC</td><td>Rp 200.000</td></tr>
+      <tr><td>UC Slow</td><td>1980 UC</td><td>Rp 290.000</td></tr>
+      <tr><td>UC Slow</td><td>2640 UC</td><td>Rp 385.000</td></tr>
+      <tr><td>UC Slow</td><td>3300 UC</td><td>Rp 480.000</td></tr>
+      <tr><td>UC Slow</td><td>3960 UC</td><td>Rp 575.000</td></tr>
+      <tr><td>UC Slow</td><td>4620 UC</td><td>Rp 670.000</td></tr>
+      <tr><td>UC Slow</td><td>5280 UC</td><td>Rp 765.000</td></tr>
+      <tr><td>UC Slow</td><td>5940 UC</td><td>Rp 860.000</td></tr>
+      <tr><td>UC Slow</td><td>6600 UC</td><td>Rp 955.000</td></tr>
+    </table>
+  </div>
+
+  <div id="list-sultan" class="table-wrap" style="display:none">
+    <table>
+      <tr><th>Paket</th><th>Jumlah UC</th><th>Harga</th></tr>
+      <tr><td>Paket Sultan Slow</td><td>8100 UC</td><td>Rp 1.200.000</td></tr>
+      <tr><td>Paket Sultan Slow</td><td>16200 UC</td><td>Rp 2.400.000</td></tr>
+      <tr><td>Paket Sultan Slow</td><td>24300 UC</td><td>Rp 3.550.000</td></tr>
+      <tr><td>Paket Sultan Slow</td><td>32400 UC</td><td>Rp 4.700.000</td></tr>
+      <tr><td>Paket Sultan Slow</td><td>40500 UC</td><td>Rp 5.850.000</td></tr>
+    </table>
+  </div>
+
+  <form id="formTx" onsubmit="submitTx(event)">
+    <div class="inline">
+      <div>
+        <label for="idpubg">ID PUBG</label>
+        <input id="idpubg" name="idpubg" type="text" placeholder="Masukkan ID PUBG kamu (8–12 digit)" required>
+        <p id="idError" class="note" style="color:#ffb3b3;display:none">ID harus angka 8–12 digit.</p>
+      </div>
+      <div>
+        <label for="kategori">Kategori Paket</label>
+        <select id="kategori" name="kategori" required onchange="syncOptions()">
+          <option value="">-- Pilih Kategori --</option>
+          <option value="fast">UC FAST</option>
+          <option value="slow">UC SLOW</option>
+          <option value="sultan">UC PAKET SULTAN SLOW</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="paket">Pilihan Paket UC</label>
+    <select id="paket" name="paket" required onchange="updateSummary()">
+      <option value="">-- Pilih Paket --</option>
+    </select>
+
+    <div class="inline">
+      <div>
+        <label for="pay">Metode Pembayaran</label>
+        <select id="pay" name="pay" required onchange="updateSummary()">
+          <option value="">-- Pilih Metode --</option>
+          <option value="qris">QRIS</option>
+          <option value="gopay">GoPay</option>
+          <option value="dana">DANA</option>
+          <option value="ovo">OVO</option>
+          <option value="transfer">Transfer Bank</option>
+        </select>
+      </div>
+      <div>
+        <label for="phone">Nomor WhatsApp (opsional)</label>
+        <input id="phone" name="phone" type="tel" placeholder="Contoh: 62812xxxxxxx">
+        <p class="note">Format internasional tanpa spasi. Contoh: 62812xxxxxxx</p>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div>
+        <div><strong>Total:</strong> <span id="sumUC">0 UC</span></div>
+        <div class="note">Harga <span id="sumPrice">Rp 0</span> • Metode <span id="sumPay">-</span></div>
+      </div>
+      <div class="total">Pastikan data sudah benar</div>
+    </div>
+
+    <button type="submit">Kirim Transaksi</button>
+    <p class="note">Setelah kirim, kamu akan menerima instruksi pembayaran dan konfirmasi proses.</p>
+  </form>
+</section>
+
+<section id="admin" class="page">
+  <div class="wrap">
+    <h2>Admin Dashboard</h2>
+    <div class="filter">
+      <div>
+        <label>Status</label>
+        <select id="fStatus" onchange="renderAdmin()">
+          <option value="">Semua</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="done">Done</option>
+        </select>
+      </div>
+      <div>
+        <label>Cari PUBG ID</label>
+        <input id="fSearch" type="text" placeholder="Masukkan PUBG ID" oninput="renderAdmin()">
+      </div>
+      <div style="align-self:flex-end">
+        <button class="btn" onclick="clearTx()">Clear Semua Data</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>PUBG ID</th><th>Kategori</th><th>Paket</th><th>UC</th><th>Harga</th><th>Metode</th><th>Status</th><th>QRIS</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="adminBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>&copy; 2025 TRIKSTAR TopUp UC PUBG. All rights reserved.</footer>
+
+<!-- Modal Konfirmasi -->
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <h3>Konfirmasi Transaksi</h3>
+    <div class="row"><div class="label">ID PUBG</div><div id="m_id">-</div></div>
+    <div class="row"><div class="label">Kategori</div><div id="m_cat">-</div></div>
+    <div class="row"><div class="label">Paket</div><div id="m_pkg">-</div></div>
+    <div class="row"><div class="label">Total</div><div id="m_total">Rp 0</div></div>
+    <div class="row"><div class="label">Metode</div><div id="m_pay">-</div></div>
+
+    <div class="pay-box" id="m_instruksi">Instruksi pembayaran akan muncul di sini.</div>
+
+    <div id="qrisBox" class="pay-box" style="display:none">
+      <strong>QRIS Dinamis:</strong><br>
+      <div id="qrcode" style="background:#fff;padding:10px;border-radius:8px;display:inline-block"></div>
+      <p class="note" id="qrisLink"></p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="closeModal()">Batal</button>
+      <button class="btn primary" onclick="confirmProceed()">Saya Sudah Bayar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+</div>
+
+<!-- QRCode.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+  /* Navigasi halaman */
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if(id==='admin') renderAdmin();
+  }
+
+  /* Data UC */
+  const dataUC = {
+    fast: [
+      { val:'60',   uc:60,   price:13000,  label:'UC Fast - 60 UC (Rp 13.000)' },
+      { val:'120',  uc:120,  price:25000,  label:'UC Fast - 120 UC (Rp 25.000)' },
+      { val:'745',  uc:180,  price:37000, label:'UC Fast - 180 UC (Rp 37.000)' },
+      { val:'325',  uc:240,  price:49000,  label:'UC Fast - 240 UC (Rp 49.000)' },
+      { val:'325',  uc:300,  price:61000,  label:'UC Fast - 300 UC (Rp 61.000)' },
+      { val:'325',  uc:420,  price:85000,  label:'UC Fast - 420 UC (Rp 85.000)' },
+      { val:'325',  uc:540,  price:109000,  label:'UC Fast - 540 UC (Rp 109.000)' },
+      { val:'325',  uc:660,  price:133000,  label:'UC Fast - 660 UC (Rp 133.000)' },
+      { val:'325',  uc:780,  price:157000,  label:'UC Fast - 780 UC (Rp 157.000)' },
+      { val:'325',  uc:900,  price:181000,  label:'UC Fast - 900 UC (Rp 181.000)' },
+      { val:'325',  uc:1080,  price:217000,  label:'UC Fast - 1080 UC (Rp 217.000)' },
+      { val:'325',  uc:1200,  price:241000,  label:'UC Fast - 1200 UC (Rp 241.000)' },
+      { val:'325',  uc:1500,  price:301000,  label:'UC Fast - 1500 UC (Rp 301.000)' },
+      { val:'325',  uc:1800,  price:331000,  label:'UC Fast - 1800 UC (Rp 331.000)' },
+      { val:'325',  uc:2400,  price:441000,  label:'UC Fast - 2400 UC (Rp 441.000)' },
+      { val:'325',  uc:3000,  price:551000,  label:'UC Fast - 3000 UC (Rp 551.000)' },
+      { val:'325',  uc:3600,  price:661000,  label:'UC Fast - 3600 UC (Rp 661.000)' },
+      { val:'325',  uc:4200,  price:771000,  label:'UC Fast - 4200 UC (Rp 771.000)' },
+      { val:'325',  uc:4800,  price:881000,  label:'UC Fast - 4800 UC (Rp 881.000)' },
+      { val:'325',  uc:5400,  price:991000,  label:'UC Fast - 54000 UC (Rp 991.000)' },
+      { val:'325',  uc:6000,  price:1101000,  label:'UC Fast - 6000 UC (Rp 1.101.000)' },
+      { val:'325',  uc:6600,  price:1211000,  label:'UC Fast - 6600 UC (Rp 1.211.000)' },
+      { val:'325',  uc:7200,  price:1321000,  label:'UC Fast - 72000 UC (Rp 1.321.000)' },
+    ],
+    slow: [
+      { val:'660',  uc:660,  price:100000, label:'UC Slow - 660 UC (Rp 100.000)' },
+      { val:'1320', uc:1320, price:200000, label:'UC Slow - 1320 UC (Rp 200.000)' },
+      { val:'1980', uc:1980, price:290000, label:'UC Slow - 1980 UC (Rp 290.000)' },
+      { val:'2640', uc:2640, price:385000, label:'UC Slow - 2640 UC (Rp 385.000)' },
+      { val:'3300', uc:3300, price:480000, label:'UC Slow - 3300 UC (Rp 480.000)' },
+      { val:'3960', uc:3960, price:575000, label:'UC Slow - 3960 UC (Rp 575.000)' },
+      { val:'4620', uc:4620, price:670000, label:'UC Slow - 4620 UC (Rp 670.000)' },
+      { val:'5280', uc:5280, price:765000, label:'UC Slow - 5280 UC (Rp 765.000)' },
+      { val:'5940', uc:5940, price:860000, label:'UC Slow - 5940 UC (Rp 860.000)' },
+      { val:'6600', uc:6600, price:955000, label:'UC Slow - 6600 UC (Rp 955.000)' },
+    ],
+    sultan: [
+      { val:'8100', uc:8100, price:1200000,  label:'Paket Sultan Slow - 8100 UC (Rp 1.200.000)' },
+      { val:'16200', uc:16200, price:2400000,  label:'Paket Sultan Slow - 16200 UC (Rp 2.400.000)' },
+      { val:'24300', uc:24300, price:3550000, label:'Paket Sultan Slow - 24300 UC (Rp 3.550.000)' },
+      { val:'32400', uc:32400, price:4700000, label:'UC Slow - 32400 UC (Rp 4.700.000)' },
+      { val:'40500', uc:40500, price:5850000, label:'UC Slow - 40500 UC (Rp 5.850.000)' },
+    ],
+  };
+
+  /* Util */
+  const toLabelCat = c => ({fast:'UC FAST', slow:'UC SLOW', sultan:'UC PAKET SULTAN SLOW'})[c] || c;
+  function rupiah(n){ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n); }
+  function genQrisUrl(txId){ return `https://pay.trikstar.local/qris/${txId}-${Date.now()}`; } // mock QRIS URL
+  function showLoading(show){ document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
+
+  /* UC tabs + form sync */
+  function showUC(cat){
+    document.querySelectorAll('.subnav button').forEach(b=>b.classList.remove('active'));
+    const map={ fast:'list-fast', slow:'list-slow', sultan:'list-sultan' };
+    ['list-fast','list-slow','list-sultan'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById(map[cat]).style.display='block';
+    const idx={fast:0,slow:1,sultan:2}[cat];
+    document.querySelectorAll('.subnav button')[idx].classList.add('active');
+    document.getElementById('kategori').value=cat;
+    syncOptions();
+  }
+  function syncOptions(){
+    const cat=document.getElementById('kategori').value;
+    const sel=document.getElementById('paket');
+    sel.innerHTML='<option value="">-- Pilih Paket --</option>';
+    if(!cat||!dataUC[cat]){ updateSummary(); return; }
+    dataUC[cat].forEach(o=>{
+      const opt=document.createElement('option');
+      opt.value=o.val; opt.textContent=o.label;
+      opt.dataset.uc = o.uc; opt.dataset.price = o.price;
+      sel.appendChild(opt);
+    });
+    updateSummary();
+  }
+  function updateSummary(){
+    const sel=document.getElementById('paket');
+    const pay=document.getElementById('pay')?.value || '';
+    const opt = sel.options[sel.selectedIndex];
+    const uc = opt?.dataset?.uc ? Number(opt.dataset.uc) : 0;
+    const price = opt?.dataset?.price ? Number(opt.dataset.price) : 0;
+    document.getElementById('sumUC').textContent = `${uc} UC`;
+    document.getElementById('sumPrice').textContent = rupiah(price);
+    if(document.getElementById('sumPay')) document.getElementById('sumPay').textContent = pay ? pay.toUpperCase() : '-';
+  }
+
+  /* Validasi */
+  function validateID(id){
+    const ok = /^[0-9]{8,12}$/.test(id);
+    const el = document.getElementById('idError');
+    el.style.display = ok ? 'none' : 'block';
+    return ok;
+  }
+
+  /* LocalStorage transaksi */
+  const LS_KEY = 'trikstar_tx';
+  function getTx(){ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }
+  function setTx(list){ localStorage.setItem(LS_KEY, JSON.stringify(list)); }
+  function addTx(tx){ const list=getTx(); list.unshift(tx); setTx(list); }
+  function updateTx(id, patch){
+    const list=getTx().map(t=> t.id===id ? {...t, ...patch} : t);
+    setTx(list);
+  }
+  function clearTx(){ setTx([]); renderAdmin(); }
+
+  /* Submit transaksi */
+  async function submitTx(e){
+    e.preventDefault();
+    const id=document.getElementById('idpubg').value.trim();
+    const cat=document.getElementById('kategori').value;
+    const paket=document.getElementById('paket');
+    const pay=document.getElementById('pay').value;
+    const phone=document.getElementById('phone').value.trim();
+
+    if(!validateID(id)) return;
+    if(!id||!cat||!paket.value||!pay){ alert('Lengkapi semua data.'); return; }
+
+    const opt = paket.options[paket.selectedIndex];
+    const uc = Number(opt.dataset.uc);
+    const price = Number(opt.dataset.price);
+
+    showLoading(true);
+    // Mock create tx (tanpa backend): generate txId, qrisUrl, simpan ke localStorage
+    setTimeout(()=>{
+      const txId = Date.now(); // unik sederhana
+      const qrisUrl = pay==='qris' ? genQrisUrl(txId) : null;
+
+      addTx({
+        id: txId, pubg_id: id, category: cat, package: opt.textContent,
+        uc_amount: uc, price, payment_method: pay, phone: phone || null,
+        status: 'pending', qris_url: qrisUrl, created_at: new Date().toISOString()
+      });
+
+      showLoading(false);
+      openModal({ id, cat, uc, price, pay, qrisUrl });
+
+      // Buat link WA prefill untuk user (simulasi notif)
+      if(phone){
+        const msg = encodeURIComponent(
+          `Halo! Transaksi kamu:\nID PUBG: ${id}\nPaket: ${uc} UC\nHarga: ${rupiah(price)}\nMetode: ${pay.toUpperCase()}\n` +
+          (qrisUrl ? `Link QRIS: ${qrisUrl}\n` : '') +
+          `Jika sudah bayar, balas "Sudah Bayar".`
+        );
+        window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+      }
+    }, 600);
+
+    /* Jika pakai backend, ganti blok di atas dengan:
+    const resp = await fetch("http://localhost:3000/api/transaction", {
+      method:"POST", headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ pubg_id:id, category:cat, packageLabel:opt.textContent, uc, price, pay, phone })
+    });
+    const data = await resp.json();
+    showLoading(false);
+    if(!data.success){ alert("Gagal membuat transaksi."); return; }
+    addTx({ id:data.txId, ... });
+    openModal({ id, cat, uc, price, pay, qrisUrl:data.qrisUrl });
+    */
+  }
+
+  /* Modal */
+  function instruksiPembayaran(method, amount){
+    const a = rupiah(amount);
+    switch(method){
+      case 'qris':
+        return `<strong>QRIS:</strong> Scan QR di bawah atau gunakan link.<br>- Nominal: <strong>${a}</strong><br>- Pastikan merchant: <em>TRIKSTAR</em><br>- Setelah bayar, klik "Saya Sudah Bayar".`;
+      case 'gopay':
+        return `<strong>GoPay:</strong> Transfer ke nomor yang dikirim via WhatsApp.<br>- Nominal: <strong>${a}</strong><br>- Catatan: <em>TOPUP UC PUBG - ID Kamu</em>`;
+      case 'dana':
+        return `<strong>DANA:</strong> Kirim ke akun DANA resmi TRIKSTAR.<br>- Nominal: <strong>${a}</strong><br>- Pastikan username penerima sesuai.`;
+      case 'ovo':
+        return `<strong>OVO:</strong> Transfer ke nomor OVO terverifikasi TRIKSTAR.<br>- Nominal: <strong>${a}</strong><br>- Pastikan tagihan berhasil.`;
+      case 'transfer':
+        return `<strong>Transfer Bank:</strong><br>- Nominal: <strong>${a}</strong><br>- Bank: BCA / BRI / Mandiri (detail via WhatsApp).<br>- Berita: <em>TOPUP UC PUBG - ID Kamu</em>`;
+      default:
+        return `Pilih metode pembayaran untuk melihat instruksi.`;
+    }
+  }
+  function openModal(data){
+    document.getElementById('m_id').textContent = data.id;
+    document.getElementById('m_cat').textContent = toLabelCat(data.cat);
+    document.getElementById('m_pkg').textContent = `${data.uc} UC`;
+    document.getElementById('m_total').textContent = rupiah(data.price);
+    document.getElementById('m_pay').textContent = data.pay.toUpperCase();
+    document.getElementById('m_instruksi').innerHTML = instruksiPembayaran(data.pay, data.price);
+
+    const qbox = document.getElementById('qrisBox');
+    const qlink = document.getElementById('qrisLink');
+    const qel = document.getElementById('qrcode');
+    qel.innerHTML = "";
+    if(data.pay === 'qris' && data.qrisUrl){
+      qbox.style.display = 'block';
+      qlink.textContent = data.qrisUrl;
+      new QRCode(qel, { text: data.qrisUrl, width: 180, height: 180 });
+    } else { qbox.style.display = 'none'; }
+
+    document.getElementById('modalBackdrop').style.display='flex';
+    window.__lastTx = data;
+  }
+  function closeModal(){ document.getElementById('modalBackdrop').style.display='none'; }
+
+  function confirmProceed(){
+    closeModal();
+    // Update status jadi 'paid' lalu render admin
+    const list = getTx();
+    const current = list.find(t => t.pubg_id === window.__lastTx.id && t.uc_amount === window.__lastTx.uc && t.price === window.__lastTx.price);
+    if(current){ updateTx(current.id, { status:'paid' }); }
+    showLoading(true);
+    setTimeout(()=>{
+      showLoading(false);
+      alert(`Terima kasih! Transaksi kamu ditandai sebagai "Paid".\nID: ${window.__lastTx.id}\nKategori: ${toLabelCat(window.__lastTx.cat)}\nPaket: ${window.__lastTx.uc} UC\nTotal: ${rupiah(window.__lastTx.price)}\nPembayaran: ${window.__lastTx.pay.toUpperCase()}`);
+      renderAdmin();
+    }, 700);
+  }
+
+  /* Admin render */
+  function renderAdmin(){
+    const tbody = document.getElementById('adminBody');
+    const status = document.getElementById('fStatus').value;
+    const search = document.getElementById('fSearch').value.trim();
+    const rows = getTx()
+      .filter(t => !status || t.status===status)
+      .filter(t => !search || t.pubg_id.includes(search));
+
+    tbody.innerHTML = rows.map(t => `
+      <tr>
+        <td>${t.id}</td>
+        <td>${t.pubg_id}</td>
+        <td>${toLabelCat(t.category)}</td>
+        <td>${t.package}</td>
+        <td>${t.uc_amount}</td>
+        <td>${rupiah(t.price)}</td>
+        <td>${t.payment_method.toUpperCase()}</td>
+        <td>${t.status.toUpperCase()}</td>
+        <td>${t.qris_url ? `<a href="${t.qris_url}" target="_blank">QR Link</a>` : '-'}</td>
+        <td>
+          ${t.status!=='paid' ? `<button class="btn" onclick="markPaid(${t.id})">Mark Paid</button>` : ''}
+          ${t.status!=='done' ? `<button class="btn" onclick="markDone(${t.id})">Mark Done</button>` : ''}
+        </td>
+      </tr>
+    `).join('');
+  }
+  function markPaid(id){ updateTx(id, {status:'paid'}); renderAdmin(); }
+  function markDone(id){ updateTx(id, {status:'done'}); renderAdmin(); }
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    showUC('fast');
+    document.getElementById('idpubg').addEventListener('input', e=>validateID(e.target.value.trim()));
+  });
+
+  /* Catatan integrasi backend:
+     - Ganti localStorage ke API server (POST /api/transaction, GET /api/admin)
+     - Simpan qris_url dari gateway (Midtrans/Xendit)
+     - Kirim WA via Fonnte di backend (jaga API key)
+  */
+</script>
+</body>
+
+</html>
